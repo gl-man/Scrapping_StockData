@@ -1,0 +1,17 @@
+-Open
+https://www.tradingview.com/symbols/NASDAQ-ALGN/
+market open: 	class="tv-symbol-header-quote__caption js-symbol-header__last-title tv-symbol-header-quote__market-stat tv-symbol-header-quote__market-stat--open"
+data:			class="tv-symbol-header-quote__value tv-symbol-header-quote__value--large js-symbol-last"
+-Company
+https://www.tradingview.com/gopro/
+ALIGN TECHNOLOGY, INC.
+-High
+https://www.tradingview.com/symbols/NASDAQ-ALGN/components/
+tv-data-table__cell tv-screener-table__cell tv-screener-table__cell--big tv-screener-table__cell--with-marker
+-Post Market
+js-symbol-header__ext-hrs-title tv-symbol-header-quote__market-stat tv-symbol-header-quote__market-stat--post
+data: tv-symbol-header-quote__value js-symbol-ext-hrs-close
+-Last Price
+tv-symbol-header-quote__caption js-symbol-header__last-title
+data: tv-symbol-header-quote__value tv-symbol-header-quote__value--large js-symbol-last
+percent data: tv-symbol-header-quote__value tv-symbol-header-quote__value--small js-symbol-change-pt
