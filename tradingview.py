@@ -89,12 +89,11 @@ def getTradingData(web_url, tickername):
         browser.close()
         pass
         
-def Realtime():
+def realtime():
     rtArray = list() 
     df = pandas.read_csv('tickerlist.csv')
 
     for ticker in df["ticker"]:
         print(ticker)
         rtArray.append(getTradingData(tv_url, ticker))
-       
     return rtArray
