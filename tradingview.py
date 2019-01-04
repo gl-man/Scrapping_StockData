@@ -11,14 +11,15 @@ import bs4
 from bs4 import BeautifulSoup as soup
 import requests
 
+path_to_chromedriver = '/usr/bin/chromedriver'
+
 balance = {}
 profit = 0
 tv_url='https://www.tradingview.com'
-tags=('','ideas', 'components', 'technicals')
 
 def getData(web_url, tickername):
     try:
-        path_to_chromedriver = '/usr/bin/chromedriver'
+        
         options = webdriver.ChromeOptions()
         prefs = {"profile.default_content_setting_values.notifications" : 2}
         options.add_experimental_option("prefs",prefs)
@@ -130,86 +131,9 @@ def getData(web_url, tickername):
         browser.close()
         pass
 
+
+
 def getRealTimeData1(web_url, tickername):
-    try:
-        path_to_chromedriver = '/usr/bin/chromedriver'
-        options = webdriver.ChromeOptions()
-        prefs = {"profile.default_content_setting_values.notifications" : 2}
-        options.add_experimental_option("prefs",prefs)
-
-        # headless
-        options.add_argument('headless')
-        options.add_argument('window-size=1200,1100'); #window size
-        browser = webdriver.Chrome(executable_path = path_to_chromedriver, chrome_options=options) #load chrome driver
-        url = web_url + '/symbols/' + tickername
-
-        browser.get(url)
-        browser.implicitly_wait(20)
-
-        TickerName = tickername
-        MarketCapitalization = browser.find_element_by_xpath('//*["@id=js-category-content"]/div[2]/div[1]/div[1]/div[1]/div[2]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/span[2]').text
-                
-        if(MarketCapitalization == "" or MarketCapitalization == "—" or MarketCapitalization == "_"):
-            while 1:
-                browser = webdriver.Chrome(executable_path = path_to_chromedriver, chrome_options=options)
-                browser.get(url)
-                browser.implicitly_wait(20)
-                MarketCapitalization = browser.find_element_by_xpath('//*["@id=js-category-content"]/div[2]/div[1]/div[1]/div[1]/div[2]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/span[2]').text
-                
-                if(MarketCapitalization != "_" and MarketCapitalization != "" and MarketCapitalization != "—"):
-                    break
-        Price = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[1]/div[1]/span[1]').text; # Open or Close Value
-        #ChangeValue and ChangeInPercent
-        #isFalling = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[1]/div[1]/span[3]').get_attribute("class")
-        ChangeValue = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[1]/div[1]/span[4]').text
-        ChangePercent = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[1]/div[1]/span[5]').text
-        ChangePercent = ChangePercent[1:-1]
-            
-        isFalling = browser.find_element_by_xpath('//*["@id=js-category-content"]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/span[3]').get_attribute("class")
-        # isFalling = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[1]/div[1]/span[3]').get_attribute("class")
-            
-        if(isFalling.find("tv-symbol-header-quote__trend-arrow--growing") == -1):     #check if the price is falling
-            ChangeValue = "-"+ChangeValue
-            ChangePercent = "-"+ChangePercent
-
-        Volume = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[2]/div[3]/span').text
-        Low = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[2]/div[4]/span[1]').text
-        High = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[2]/div[4]/span[3]').text
-        EPS = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[2]/div[5]/span').text
-        PE = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[2]/div[7]/span').text
-        # ForwardPE   = 
-        DivYield = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[2]/div[8]/span').text
-        isOpen = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[1]/div[1]/div').text;
-        
-        if(isOpen == "Market Open"):
-            isOpen = "open"
-        else:
-            isOpen = "close"
-
-        browser.close()
-
-        realtimeData = [
-            isOpen,
-            Price,
-            ChangeValue,
-            ChangePercent,
-            Volume,
-            Low,
-            High,
-            EPS,
-            PE,
-            DivYield,
-            MarketCapitalization,
-            TickerName
-        ]
-        return realtimeData
-
-    except Exception as ex:
-        print(ex)
-        browser.close()
-        pass
-
-def getRealTimeData(web_url, tickername):
     try:
         options = webdriver.ChromeOptions()
         prefs = {"profile.default_content_setting_values.notifications" : 2}
@@ -217,7 +141,7 @@ def getRealTimeData(web_url, tickername):
         options.add_argument('headless')
         options.add_argument('window-size=1200,1100');
 
-        driver = webdriver.Chrome("/usr/bin/chromedriver", chrome_options=options)
+        driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
 
         url = web_url + '/symbols/' + tickername
         driver.get(url)
@@ -229,7 +153,24 @@ def getRealTimeData(web_url, tickername):
 
         containers = page_soup.findAll("div", {"class":"tv-symbol-header-row"})
 
-        isOpen = containers[0].findAll("div", {"class":"tv-symbol-header-quote__market-stat"})[0].text
+        MarketCapitalization = "AA"
+        MarketCapitalization = containers[0].findAll("span", {"class":"js-symbol-market-cap"})[0].text
+
+        while 1:
+            if(containers[0].findAll("div", {"class":"tv-symbol-header-quote__market-stat"}) == ""  or containers[0].findAll("div", {"class":"tv-symbol-header-quote__market-stat"}) == []):
+                driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
+                url = web_url + '/symbols/' + tickername
+                driver.get(url)
+
+                res = driver.execute_script("return document.documentElement.outerHTML")
+                driver.quit()
+                page_soup = soup(res, "lxml")
+                containers = page_soup.findAll("div", {"class":"tv-symbol-header-row"})
+            else:
+                break;
+
+        isOpen = containers[0].findAll("div", {"class":"tv-symbol-header-quote__market-stat"})[0].text     
+
         if(isOpen == "Market Closed"):
             isOpen = "close"
         else:
@@ -257,20 +198,92 @@ def getRealTimeData(web_url, tickername):
 
         EPS = containers[0].findAll("span", {"class":"js-symbol-eps"})[0].text
 
+        PE = containers[0].findAll("span", {"class":"js-symbol-pe"})[0].text
+
+        DivYield = containers[0].findAll("span", {"class":"js-symbol-dividends"})[0].text
+        
+        TickerName = tickername
+
+        realtimeData = [
+            isOpen,
+            Price,
+            ChangeValue,
+            ChangePercent,
+            Volume,
+            Low,
+            High,
+            EPS,
+            PE,
+            DivYield,
+            MarketCapitalization,
+            TickerName
+        ]
+
+        print(realtimeData)
+
+        return realtimeData
+
+    except Exception as ex:
+        print(ex)
+        pass
+
+def getRealTimeData(web_url, tickername):
+    try:
+        options = webdriver.ChromeOptions()
+        prefs = {"profile.default_content_setting_values.notifications" : 2}
+        options.add_experimental_option("prefs",prefs)
+        options.add_argument('headless')
+        options.add_argument('window-size=1200,1100');
+
+        driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
+
+        url = web_url + '/symbols/' + tickername
+        driver.get(url)
+
+        res = driver.execute_script("return document.documentElement.outerHTML")
+        driver.quit()
+
+        page_soup = soup(res, "lxml")
+
+        containers = page_soup.findAll("div", {"class":"tv-symbol-header-row"})
+
         MarketCapitalization = containers[0].findAll("span", {"class":"js-symbol-market-cap"})[0].text
+
+        isOpen = containers[0].findAll("div", {"class":"js-symbol-header__last-title"})[0].text
+
+        if(isOpen == "Market Closed"):
+            isOpen = "close"
+        else:
+            isOpen = "open"
+
+        isFalling = containers[0].findAll("span", {"class":"tv-symbol-header-quote__trend-arrow--falling"}) 
+
+        Price = containers[0].findAll("span", {"class":"js-symbol-last"})[0].text 
+
+        ChangeValue = containers[0].findAll("span", {"class":"js-symbol-change"})[0].text
+        ChangePercent = containers[0].findAll("span", {"class":"js-symbol-change-pt"})[0].text
+        ChangePercent = ChangePercent[1:-1]
+
+        if(isFalling != []):
+            ChangeValue = "-"+ChangeValue
+            ChangePercent = "-"+ChangePercent
+
+        Volume = containers[0].findAll("span", {"class":"js-symbol-volume"})[0].text
+
+        Open = containers[0].findAll("span", {"class":"js-symbol-open"})[0].text
+        Close = containers[0].findAll("span", {"class":"js-symbol-prev-close"})[0].text
+
+        Low = containers[0].findAll("span", {"class":"js-symbol-header__range-price-l"})[0].text
+        High = containers[0].findAll("span", {"class":"js-symbol-header__range-price-r"})[0].text
+
+        EPS = containers[0].findAll("span", {"class":"js-symbol-eps"})[0].text
 
         PE = containers[0].findAll("span", {"class":"js-symbol-pe"})[0].text
 
         DivYield = containers[0].findAll("span", {"class":"js-symbol-dividends"})[0].text
         
         TickerName = tickername
-        # isOpen = browser.find_element_by_xpath('//*[@id="anchor-page-1"]/div/div[3]/div/div[1]/div[1]/div').text;
         
-        # if(isOpen == "Market Open"):
-        #     isOpen = "open"
-        # else:
-        #     isOpen = "close"
-
         realtimeData = [
             isOpen,
             Price,

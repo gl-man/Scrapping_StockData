@@ -11,6 +11,7 @@ import bs4
 from bs4 import BeautifulSoup as soup
 import requests
 
+path_to_chromedriver = "/usr/bin/chromedriver"
 balance = {}
 profit = 0
 tv_url='https://www.marketwatch.com/investing/stock/'
@@ -23,7 +24,7 @@ def getData1(web_url, tickername):
         options.add_argument('headless')
         options.add_argument('window-size=1200,1100');
 
-        driver = webdriver.Chrome("/usr/bin/chromedriver", chrome_options=options)
+        driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
 
         # if(tickername == "NASDAQ-ALGN"):
         #     tv_url = tv_url + "ALGN/"
@@ -68,7 +69,7 @@ def getData2(web_url, tickername):
         options.add_argument('headless')
         options.add_argument('window-size=1200,1100');
 
-        driver = webdriver.Chrome("/usr/bin/chromedriver", chrome_options=options)
+        driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
 
         url = web_url + tickername +"/analystestimates"
         driver.get(url)
@@ -120,7 +121,7 @@ def getGL():
     options.add_argument('headless')
     options.add_argument('window-size=1200,1100');
 
-    driver = webdriver.Chrome("/usr/bin/chromedriver", chrome_options=options)
+    driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
 
     url = 'https://www.marketwatch.com/'
     driver.get(url)
