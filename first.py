@@ -18,13 +18,14 @@ import tradingview as trading
 import marketwatch as market
 import datetime
 
-hosturl 	= "35.247.144.114"
+hosturl 	= "35.197.135.249"
 dbuser 		= "root"
 dbpassoword = "password"
-dbname 		= "Stock_Prediction"
-table_name = ['tbl_ALIGN', 'tbl_IBM', 'tbl_AAL', 'tbl_POLY', 'tbl_RRS']
+dbname 		= "stockprediction"
+stock_table_name = ['tbl_align', 'tbl_ibm', 'tbl_aal', 'tbl_poly', 'tbl_rrs']
+ticker_table_name = ['ticker_usa', 'ticker_europe', 'ticker_asia', 'ticker_fx', 'ticker_crypto']
 realtime_table = "tbl_Realtime"
-top_table = "tbl_TopGL"
+top_table = "tbl_topStock"
 
 def compare(date1, date2):
     if(date1==""):
@@ -116,13 +117,77 @@ def GLtoSql(data):
             
             datastr = "(" + datastr + ")"
 
-            sql = "INSERT INTO "+top_table+" (Tickername, ChangePercent) VALUES "+datastr
+            sql = "INSERT INTO "+top_table+" (StockName, ChangePercent) VALUES "+datastr
             mycursor.execute(sql)
             mydb.commit()
             
         mycursor.close()
         mydb.close()
-        print("TopGainerLoser SUccesssss")
+        print("TopGainerLoser SUccesss!")
+    except Exception as e: print(e)
+
+def TickerToSql(data):
+    try:
+        mydb = mysql.connector.connect(
+              host      = hosturl,
+              user      = dbuser,
+              passwd    = dbpassoword,
+              database  = dbname
+        )
+        mycursor = mydb.cursor()
+        for i in range(5):
+            sql = "DELETE FROM " + ticker_table_name[i] + " WHERE 1=1"
+            mycursor.execute(sql)
+            mydb.commit()
+
+            for j in range(6):
+                datastr = ""                    
+                datastr = datastr + "'" + data[i][0][j] + "'" + ","
+                datastr = datastr + "'" + data[i][1][j] + "'" + ","
+                datastr = datastr + "'" + data[i][2][j] + "'" + ","
+                datastr = datastr + "'" + data[i][3][j] + "'"                
+                datastr = "(" + datastr + ")"
+
+                sql = "INSERT INTO "+ticker_table_name[i]+" (symbol, price, changevalue, percent) VALUES "+datastr
+                mycursor.execute(sql)
+                mydb.commit()
+            
+        mycursor.close()
+        mydb.close()
+        print("TickerData Saved Successfully!")
+    except Exception as e: print(e)
+
+def StockToSql(data):
+    try:
+        mydb = mysql.connector.connect(
+              host      = hosturl,
+              user      = dbuser,
+              passwd    = dbpassoword,
+              database  = dbname
+        )
+        mycursor = mydb.cursor()
+        for i in range(5):
+
+            sql = "DELETE FROM " + stock_table_name[i] + " WHERE 1=1"
+            mycursor.execute(sql)
+            mydb.commit()
+
+            datastr = ""
+
+            for j in range(28):                                    
+                datastr = datastr + "'" + data[i][j] + "'" + ","               
+            
+            datastr = datastr + "'" + data[i][28] + "'"
+            datastr = "(" + datastr + ")"
+            
+            sql = "INSERT INTO " + stock_table_name[i] + " (symbolName, marketType, price, changeValue, changePercent, open, marketCap, sharesOutstanding, publicFloat, beta, revPerEmployee, peRatio, eps, yield, dividend, exdividendDate, shortInterest, floatShorted, averageVolume, dayLow, dayHigh, weekLow52, weekHigh52, week1, month1, month3, ytd, year1, volume) VALUES " + datastr
+
+            mycursor.execute(sql)
+            mydb.commit()
+            
+        mycursor.close()
+        mydb.close()
+        print("StockData Saved Successfully!")
     except Exception as e: print(e)
 
 
@@ -157,16 +222,62 @@ def getGL():
         datas = market.getGL()
         GLtoSql(datas)
         execute_time = time.time() - start_time
+        time.sleep(1)
+        # if(execute_time > 60):
+        #     time.sleep(0)
+        # else:
+        #     time.sleep(60 - execute_time)
+
+
+def getTopGL():
+    while 1:
+        start_time = time.time()
+        datas = trading.getTopGL()
+        # GLtoSql(datas)
+        execute_time = time.time() - start_time
         if(execute_time > 60):
             time.sleep(0)
         else:
             time.sleep(60 - execute_time)
 
+
+def getTickerRealTimeData():
+    while 1:
+        start_time = time.time()
+        datas = market.getTickerRealTimeData()
+        TickerToSql(datas)
+        execute_time = time.time() - start_time
+        print(execute_time)
+        time.sleep(1)
+        # if(execute_time > 40):
+        #     time.sleep(0)
+        # else:
+        #     time.sleep(40 - execute_time)    
+
+
+
+def getStockData():
+    while 1:
+        start_time = time.time()
+        datas = market.getStockData()
+        StockToSql(datas)
+        execute_time = time.time() - start_time
+        print("Stock Scrapping Time:", execute_time)
+        time.sleep(1)
+        # if(execute_time > 60):
+        #     time.sleep(0)
+        # else:
+        #     time.sleep(60 - execute_time)
+
 def main():
 	try:
-         _thread.start_new_thread( getData, () )
-         _thread.start_new_thread( getRealTimeData, () )
+         # _thread.start_new_thread( getData, () )
+         # _thread.start_new_thread( getRealTimeData, () )
          _thread.start_new_thread( getGL, () )
+         # _thread.start_new_thread( getTickerRealTimeData, () )
+         # _thread.start_new_thread( getTopGL, () ) #to get ticker realtime data
+         _thread.start_new_thread( getTickerRealTimeData, () )
+         _thread.start_new_thread( getStockData, () )
 	except:
 		print ("Error: unable to start thread")
 	while 1:

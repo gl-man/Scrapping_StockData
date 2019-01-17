@@ -17,16 +17,17 @@ balance = {}
 profit = 0
 tv_url='https://www.tradingview.com'
 
+top_gainer_url = "https://www.tradingview.com/markets/stocks-usa/market-movers-gainers/"
+top_loser_url = "https://www.tradingview.com/markets/stocks-usa/market-movers-losers/"
+
+options = webdriver.ChromeOptions()
+prefs = {"profile.default_content_setting_values.notifications" : 2}
+options.add_experimental_option("prefs",prefs)
+options.add_argument('headless')
+options.add_argument('window-size=1200,1100')
+
 def getData(web_url, tickername):
     try:
-        
-        options = webdriver.ChromeOptions()
-        prefs = {"profile.default_content_setting_values.notifications" : 2}
-        options.add_experimental_option("prefs",prefs)
-
-        # headless
-        options.add_argument('headless')
-        options.add_argument('window-size=1200,1100'); #window size
         browser = webdriver.Chrome(executable_path = path_to_chromedriver, chrome_options=options) #load chrome driver
         url = web_url + '/symbols/' + tickername
 
@@ -135,12 +136,6 @@ def getData(web_url, tickername):
 
 def getRealTimeData1(web_url, tickername):
     try:
-        options = webdriver.ChromeOptions()
-        prefs = {"profile.default_content_setting_values.notifications" : 2}
-        options.add_experimental_option("prefs",prefs)
-        options.add_argument('headless')
-        options.add_argument('window-size=1200,1100');
-
         driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
 
         url = web_url + '/symbols/' + tickername
@@ -322,3 +317,25 @@ def getrealtimedata():
     for ticker in df["ticker"]:
         rtArray.append(getRealTimeData(tv_url, ticker))
     return rtArray
+
+def getTopGL():
+    ticker_list = list()
+
+    driver = webdriver.Chrome(executable_path = path_to_chromedriver, chrome_options=options) #load chrome driver
+    driver.get(top_gainer_url)
+    # browser.implicitly_wait(20)
+    # structrue = browser.find_element_by_xpath('//*["@class=markets_group"]/table/tbody/tr[1]/td[2]').text
+    while True:
+        if EC.presence_of_all_elements_located:
+            break
+        else:
+            continue
+
+    res = driver.execute_script("return document.documentElement.outerHTML")
+    driver.quit()
+
+    page_soup = soup(res, "lxml")
+    containers = page_soup.findAll("tbody", {"class":"tv-data-table__tbody"})[0]
+    print(containers.text)
+    return 1
+
