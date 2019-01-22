@@ -42,7 +42,7 @@ options.add_argument("--disable-gpu-sandbox")
 options.add_argument("--disable-extensions")
 options.add_argument("--dns-prefetch-disable")
 
-def getData1(web_url, tickername):
+def getData1(tickername):
     try:
         driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
 
@@ -51,7 +51,7 @@ def getData1(web_url, tickername):
         # else if(tickername == "NYSE-IBM"):
         #     tv_url = tv_url + "IBM/"
         # else if(tickername == "")
-        url = web_url + tickername
+        url = tv_url + tickername
         driver.get(url)
 
         res = driver.execute_script("return document.documentElement.outerHTML")
@@ -81,11 +81,11 @@ def getData1(web_url, tickername):
         print(ex)
         pass
 
-def getData2(web_url, tickername):
+def getData2(tickername):
     try:
         driver = webdriver.Chrome(path_to_chromedriver, chrome_options=options)
 
-        url = web_url + tickername +"/analystestimates"
+        url = tv_url + tickername +"/analystestimates"
         driver.get(url)
 
         res = driver.execute_script("return document.documentElement.outerHTML")
@@ -117,14 +117,14 @@ def realtime1():
     rtArray = list() 
     df = pandas.read_csv('market_ticker.csv')
     for ticker in df["ticker"]:
-        rtArray.append(getData1(tv_url, ticker))
+        rtArray.append(getData1(ticker))
     return rtArray
 
 def realtime2():
     rtArray = list() 
     df = pandas.read_csv('market_ticker.csv')
-    for ticker1 in df["ticker"]:
-        rtArray.append(getData2(tv_url, ticker1))
+    for ticker in df["ticker"]:
+        rtArray.append(getData2(ticker))
     return rtArray
 
 
@@ -177,6 +177,7 @@ def getTickerRealTimeData():
         driver = webdriver.Chrome(executable_path = path_to_chromedriver, chrome_options=options)
         driver.get(ticker_url)
         driver.implicitly_wait(20)
+
         while True:
             if EC.presence_of_all_elements_located:
                 break
@@ -192,7 +193,8 @@ def getTickerRealTimeData():
                 print("Retrying...")
                 continue
 
-        driver.implicitly_wait(20)
+        time.sleep(3)
+        # driver.implicitly_wait(20)
         res = driver.execute_script("return document.documentElement.outerHTML")
         # driver.quit()
 
@@ -217,6 +219,12 @@ def getTickerRealTimeData():
         ]
 
         while True:
+            if EC.presence_of_all_elements_located:
+                break
+            else:
+                continue
+
+        while True:
             try:
                 Create = driver.find_element_by_xpath("//ul[@class='tabs']/li[2]/a")
                 driver.execute_script("arguments[0].click()", Create)                
@@ -225,7 +233,8 @@ def getTickerRealTimeData():
                 print("Retrying...")
                 continue
 
-        driver.implicitly_wait(20)
+        time.sleep(3)
+        # driver.implicitly_wait(20)
         
         res = driver.execute_script("return document.documentElement.outerHTML")
         page_soup = soup(res, "lxml")
@@ -249,6 +258,12 @@ def getTickerRealTimeData():
         ]
 
         while True:
+            if EC.presence_of_all_elements_located:
+                break
+            else:
+                continue
+
+        while True:
             try:
                 Create = driver.find_element_by_xpath("//ul[@class='tabs']/li[3]/a")
                 driver.execute_script("arguments[0].click()", Create)                
@@ -257,7 +272,8 @@ def getTickerRealTimeData():
                 print("Retrying...")
                 continue
 
-        driver.implicitly_wait(20)
+        time.sleep(3)
+        # driver.implicitly_wait(20)
         
         res = driver.execute_script("return document.documentElement.outerHTML")
         page_soup = soup(res, "lxml")
@@ -280,6 +296,13 @@ def getTickerRealTimeData():
             percent_list3
         ]
 
+
+        while True:
+            if EC.presence_of_all_elements_located:
+                break
+            else:
+                continue
+
         while True:
             try:
                 Create = driver.find_element_by_xpath("//ul[@class='tabs']/li[4]/a")
@@ -289,7 +312,8 @@ def getTickerRealTimeData():
                 print("Retrying...")
                 continue
 
-        driver.implicitly_wait(20)
+        time.sleep(3)
+        # driver.implicitly_wait(20)
         
         res = driver.execute_script("return document.documentElement.outerHTML")
         page_soup = soup(res, "lxml")
@@ -313,6 +337,12 @@ def getTickerRealTimeData():
         ]
 
         while True:
+            if EC.presence_of_all_elements_located:
+                break
+            else:
+                continue
+
+        while True:
             try:
                 Create = driver.find_element_by_xpath("//ul[@class='tabs']/li[7]/a")
                 driver.execute_script("arguments[0].click()", Create)             
@@ -321,7 +351,8 @@ def getTickerRealTimeData():
                 print("Retrying...")
                 continue
 
-        driver.implicitly_wait(20)
+        time.sleep(3)
+        # driver.implicitly_wait(20)
         
         res = driver.execute_script("return document.documentElement.outerHTML")
         driver.quit()
@@ -359,7 +390,7 @@ def getTickerRealTimeData():
         print(ex)
         pass
 
-def getStockData():
+def getRealtimeStockData():
     rtArray = [[], [], [], [], []]   
     for i in range(5):
         geturl = tv_url+stockUrl[i]

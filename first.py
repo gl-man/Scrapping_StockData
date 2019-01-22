@@ -21,9 +21,9 @@ import datetime
 hosturl 	= "35.197.135.249"
 dbuser 		= "root"
 dbpassoword = "password"
-dbname 		= "stockprediction"
-stock_table_name = ['tbl_align', 'tbl_ibm', 'tbl_aal', 'tbl_poly', 'tbl_rrs']
-ticker_table_name = ['ticker_usa', 'ticker_europe', 'ticker_asia', 'ticker_fx', 'ticker_crypto']
+dbname 		= "stock_prediction"
+stock_table_name = ['tbl_align', 'tbl_poly', 'tbl_aal', 'tbl_ibm', 'tbl_rrs']
+ticker_table_name = ['ticker_usa', 'ticker_fx', 'ticker_asia', 'ticker_europe', 'ticker_crypto']
 realtime_table = "tbl_Realtime"
 top_table = "tbl_topStock"
 
@@ -34,68 +34,6 @@ def compare(date1, date2):
         date1 = datetime.strptime (date1, '%b %d, %Y')
         date2 = datetime.strptime (date2, '%b %d, %Y')
         return date1 < date2
-
-def DataToSql(data1, data2, data3):
-    try:
-        mydb = mysql.connector.connect(
-              host      = hosturl,
-              user      = dbuser,
-              passwd    = dbpassoword,
-              database  = dbname
-        )
-        mycursor = mydb.cursor()
-        mydatetime = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-        for y in range(5):            
-            datastr = ""
-            for x in range(26):
-                datastr = datastr + "'" + data1[y][x] + "'" + ","
-            for x in range(2):
-                datastr = datastr + "'" + data2[y][x] + "'" + ","
-            
-            datastr = datastr + "'" + data3[y][0] + "'" + ","
-            datastr = datastr + "'" + data3[y][1] + "'" + ","
-
-            datastr = datastr + "'" + "20" + mydatetime + "'"
-            
-            datastr = "(" + datastr + ")"
-            
-            sql = "INSERT INTO "+table_name[y]+" (MarketCapitalisation, PBPrictoBookRatio, QuickRatio, CurrentRatio, DEDebttoEquityRatio, ReturnonAssets, ReturnonEquity, ReturnonInvestedCapital, NetMargin, GrossMargin, OperatingMargin, PreTaxMargin, Volume, DayRangeLow, DayRangeHigh, PE, Beta, Dividend, DividendYield, WeekRangeLow52, WeekRangeHigh52, Price, Low, High, ChangeValue, ChangePercent, Open, Close, Recommendations, TargetPrice, Date) VALUES "+datastr
-            mycursor.execute(sql)
-            mydb.commit()
-        mycursor.close()
-        mydb.close()
-        print("Stock Success")
-            
-    except Exception as e: print(e)
-
-
-def RealTimeDataToSql(data):
-    try:
-        mydb = mysql.connector.connect(
-              host      = hosturl,
-              user      = dbuser,
-              passwd    = dbpassoword,
-              database  = dbname
-        )
-        mycursor = mydb.cursor()
-        mydatetime = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-        for y in range(5):            
-            datastr = ""
-            for x in range(12):
-                datastr = datastr + "'" + data[y][x] + "'" + ","
-
-            datastr = datastr + "'" + "20" + mydatetime + "'"
-            
-            datastr = "(" + datastr + ")"
-            
-            sql = "INSERT INTO "+realtime_table+" (Status, Price, ChangeValue, ChangePercent, Volume, Low, High, EPS, PE, DivYield, MarketCapitalization, Stockname,  Date) VALUES "+datastr
-            mycursor.execute(sql)
-            mydb.commit()
-
-        mycursor.close()
-        mydb.close()
-        print("Realtime SUccesssss")
-    except Exception as e: print(e)
 
 def GLtoSql(data):
     try:
@@ -123,7 +61,7 @@ def GLtoSql(data):
             
         mycursor.close()
         mydb.close()
-        print("TopGainerLoser SUccesss!")
+        print("TopGainerLoserData Saved Successfully!")
     except Exception as e: print(e)
 
 def TickerToSql(data):
@@ -157,7 +95,7 @@ def TickerToSql(data):
         print("TickerData Saved Successfully!")
     except Exception as e: print(e)
 
-def StockToSql(data):
+def RealStockToSql(data):
     try:
         mydb = mysql.connector.connect(
               host      = hosturl,
@@ -177,10 +115,14 @@ def StockToSql(data):
             for j in range(28):                                    
                 datastr = datastr + "'" + data[i][j] + "'" + ","               
             
-            datastr = datastr + "'" + data[i][28] + "'"
+            datastr = datastr + "'" + data[i][28] + "'" + ","
+
+            mydatetime = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+            datastr = datastr + "'" + mydatetime + "'"
+
             datastr = "(" + datastr + ")"
             
-            sql = "INSERT INTO " + stock_table_name[i] + " (symbolName, marketType, price, changeValue, changePercent, open, marketCap, sharesOutstanding, publicFloat, beta, revPerEmployee, peRatio, eps, yield, dividend, exdividendDate, shortInterest, floatShorted, averageVolume, dayLow, dayHigh, weekLow52, weekHigh52, week1, month1, month3, ytd, year1, volume) VALUES " + datastr
+            sql = "INSERT INTO " + stock_table_name[i] + " (symbolName, marketType, price, changeValue, changePercent, open, marketCap, sharesOutstanding, publicFloat, beta, revPerEmployee, peRatio, eps, yield, dividend, exdividendDate, shortInterest, floatShorted, averageVolume, dayLow, dayHigh, weekLow52, weekHigh52, week1, month1, month3, ytd, year1, volume, GotTime) VALUES " + datastr
 
             mycursor.execute(sql)
             mydb.commit()
@@ -190,56 +132,17 @@ def StockToSql(data):
         print("StockData Saved Successfully!")
     except Exception as e: print(e)
 
-
-def getData():
-    while 1:
-        print("Hi")
-        start_time = time.time()
-        datas1 = trading.realtime()
-        datas2 = market.realtime1()
-        datas3 = market.realtime2()
-        DataToSql(datas1, datas2, datas3)
-        execute_time = time.time() - start_time
-        if(execute_time > 3600):
-            time.sleep(0)
-        else:
-            time.sleep(3600 - execute_time)
-
-def getRealTimeData():
-    while 1:
-        start_time = time.time()
-        datas = trading.getrealtimedata()
-        RealTimeDataToSql(datas)
-        execute_time = time.time() - start_time
-        if(execute_time > 60):
-            time.sleep(0)
-        else:
-            time.sleep(60 - execute_time)
-
 def getGL():
     while 1:
         start_time = time.time()
         datas = market.getGL()
         GLtoSql(datas)
         execute_time = time.time() - start_time
-        time.sleep(1)
+        time.sleep(2)
         # if(execute_time > 60):
         #     time.sleep(0)
         # else:
         #     time.sleep(60 - execute_time)
-
-
-def getTopGL():
-    while 1:
-        start_time = time.time()
-        datas = trading.getTopGL()
-        # GLtoSql(datas)
-        execute_time = time.time() - start_time
-        if(execute_time > 60):
-            time.sleep(0)
-        else:
-            time.sleep(60 - execute_time)
-
 
 def getTickerRealTimeData():
     while 1:
@@ -248,36 +151,40 @@ def getTickerRealTimeData():
         TickerToSql(datas)
         execute_time = time.time() - start_time
         print(execute_time)
-        time.sleep(1)
+        time.sleep(2)
         # if(execute_time > 40):
         #     time.sleep(0)
         # else:
-        #     time.sleep(40 - execute_time)    
+        #     time.sleep(40 - execute_time)
 
-
-
-def getStockData():
+def getRealtimeStockData():
     while 1:
         start_time = time.time()
-        datas = market.getStockData()
-        StockToSql(datas)
+        datas = market.getRealtimeStockData()
+        RealStockToSql(datas)
         execute_time = time.time() - start_time
-        print("Stock Scrapping Time:", execute_time)
-        time.sleep(1)
+        print("Realtime Stock Scrapping Time:", execute_time)
+        time.sleep(2)
         # if(execute_time > 60):
         #     time.sleep(0)
         # else:
         #     time.sleep(60 - execute_time)
 
+def getStockData():
+    while 1:
+        start_time = time.time()
+        datas = trading.getStockData()
+        print(datas)
+        # RealStockToSql(datas)
+        execute_time = time.time() - start_time
+        print("Stock Scrapping Time:", execute_time)
+        time.sleep(2)
+
 def main():
 	try:
-         # _thread.start_new_thread( getData, () )
-         # _thread.start_new_thread( getRealTimeData, () )
          _thread.start_new_thread( getGL, () )
-         # _thread.start_new_thread( getTickerRealTimeData, () )
-         # _thread.start_new_thread( getTopGL, () ) #to get ticker realtime data
          _thread.start_new_thread( getTickerRealTimeData, () )
-         _thread.start_new_thread( getStockData, () )
+         _thread.start_new_thread( getRealtimeStockData, () )
 	except:
 		print ("Error: unable to start thread")
 	while 1:
